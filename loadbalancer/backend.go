@@ -13,6 +13,7 @@ type Backend interface {
 	IsAlive() bool
 	GetUrl() *url.URL
 	GetConnections() int //Active connections
+	GetWeight() int //Weighted round robin
 	Serve(http.ResponseWriter, *http.Request)
 }
 
@@ -21,7 +22,7 @@ type backend struct {
 	rProxy *httputil.ReverseProxy //reverse proxy
 	mux sync.RWMutex
 	url *url.URL
-	connections int
+	connections, weight int
 	alive bool
 	
 	Backend
@@ -44,6 +45,10 @@ func (b *backend) GetUrl() *url.URL {
 
 func (b *backend) GetConnections() int {
 	return b.connections
+}
+
+func (b *backend) GetWeight() int {
+	return b.weight
 }
 
 func (b *backend) Serve(http.ResponseWriter, *http.Request) {

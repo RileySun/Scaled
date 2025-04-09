@@ -5,9 +5,15 @@ import(
 	"log"
 	"time"
 	"net/http"
+	"math/rand"
 	
 	"github.com/joho/godotenv"
 )
+
+//Init
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 //Database credentials
 type Credentials struct {
@@ -55,4 +61,9 @@ func StartHTTPServer(r http.Handler, port string) *http.Server {
 
 	//returned for Shutdown()
 	return srv
+}
+
+//Get Random Int (Min Inclusive->Max Exclusive)
+func GetRandomInt(min int, max int) int {
+    return min + rand.Intn(max-min)
 }

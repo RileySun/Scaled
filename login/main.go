@@ -154,7 +154,7 @@ func main() {
 	server = utils.StartHTTPServer(router, "8080")
 	<-done
 	
-	//Context for shutting fown
+	//Context for shutting down
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer func() {
 		//Graceful shutdown functions here

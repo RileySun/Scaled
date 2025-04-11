@@ -5,5 +5,5 @@ Decouples handler, business, and data logic into three seperate modules that can
 
 **Advantages**:
 * Decoupled modules perfect for scaling horizontally
-* Message Queuing for module communication
+* Message Queuing for module communication (To-Do)
 * Data store caching

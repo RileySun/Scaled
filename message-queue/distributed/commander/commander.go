@@ -33,8 +33,12 @@ func NewSender() *Sender {
 	sender.channel, err = sender.connection.Channel()
 	sender.onError(err, "Channel Open Error")
 	
+	//Set Fair Dispatch
+	err = reciever.channel.Qos(1, 0, false)
+	sender.onError(err, "QoS Setup Error")
+	
 	//Create Queue
-	sender.queue, err = sender.channel.QueueDeclare("Main", false, false, false, false, nil)
+	sender.queue, err = sender.channel.QueueDeclare("Main", true, false, false, false, nil)
 	sender.onError(err, "Queue Open Error")
 	
 	return sender

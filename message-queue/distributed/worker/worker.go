@@ -30,8 +30,12 @@ func NewReciever() *Reciever {
 	reciever.channel, err = reciever.connection.Channel()
 	reciever.onError(err, "Channel Open Error")
 	
+	//Set Fair Dispatch
+	err = reciever.channel.Qos(1, 0, false)
+	sender.onError(err, "QoS Setup Error")
+	
 	//Create Queue
-	reciever.queue, err = reciever.channel.QueueDeclare("Main", false, false, false, false, nil)
+	reciever.queue, err = reciever.channel.QueueDeclare("Main", true, false, false, false, nil)
 	reciever.onError(err, "Queue Open Error")
 	
 	return reciever
@@ -39,7 +43,7 @@ func NewReciever() *Reciever {
 
 //Actions
 func (r *Reciever) Start() {
-	msgs, err := r.channel.Consume(r.queue.Name, "", true, false, false, false, nil)
+	msgs, err := r.channel.Consume(r.queue.Name, "", false, false, false, false, nil)
 	r.onError(err, "Consume Register Error")
 	
 	var forever chan struct{}
@@ -47,6 +51,7 @@ func (r *Reciever) Start() {
 	go func() {
 		for d := range msgs {
 			distributedWork(d.Body)
+			d.Ack(false)
 		}
 	}()
 	

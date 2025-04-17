@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
-	"bytes"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -30,13 +28,21 @@ func NewReciever() *Reciever {
 	reciever.channel, err = reciever.connection.Channel()
 	reciever.onError(err, "Channel Open Error")
 	
+	//Create Exchange
+	err = reciever.channel.ExchangeDeclare("logs", "fanout", true, false, false, false, nil)
+	reciever.onError(err, "Exchange Declare Error")
+	
 	//Set Fair Dispatch
 	err = reciever.channel.Qos(1, 0, false)
 	reciever.onError(err, "QoS Setup Error")
 	
 	//Create Queue
-	reciever.queue, err = reciever.channel.QueueDeclare("Main", true, false, false, false, nil)
+	reciever.queue, err = reciever.channel.QueueDeclare("", false, false, true, false, nil)
 	reciever.onError(err, "Queue Open Error")
+	
+	//Bind Queue to Exchange
+	err = reciever.channel.QueueBind(reciever.queue.Name, "", "logs", false, nil)
+	reciever.onError(err, "Queue Bind Error")
 	
 	return reciever
 }
@@ -50,7 +56,7 @@ func (r *Reciever) Start() {
 	
 	go func() {
 		for d := range msgs {
-			distributedWork(d.Body)
+			publishedMessage(d.Body)
 			d.Ack(false)
 		}
 	}()
@@ -60,8 +66,8 @@ func (r *Reciever) Start() {
 	<-forever
 }
 
-func distributedWork(message string) {
-	//
+func publishedMessage(message []byte) {
+	log.Println(string(message[:]))
 }
 
 //Utils

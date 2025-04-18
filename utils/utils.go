@@ -42,6 +42,14 @@ func LoadCredentials() *Credentials {
 	return creds
 }
 
+func LoadEnv() {
+	envErr := godotenv.Load("./.env")
+	if envErr != nil {
+		log.Println("Utils: Error loading .env file - ", envErr)
+		log.Println("This may be caused by running in docker")
+	}
+}
+
 //HTTP Server
 func StartHTTPServer(r http.Handler, port string) *http.Server {
 	srv := &http.Server{

@@ -2,3 +2,4 @@ utils/.env
 /RAW
 *.DS_Store
 /message-queue/RAW
+/websocket/RAW

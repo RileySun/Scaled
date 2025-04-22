@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1">
+		<link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+		<meta name="apple-mobile-web-app-title" content="Monitoring-{{.Name}}" />
+		<link rel="shortcut icon" href="static/favicon.ico">
+		<style>a {color: #FFF;}</style><!--or links are blue at first-->
+
+		<title>Monitoring - {{.Name}}</title>
+		<link rel="stylesheet" href="static/css/dashboard.css">
+		<script src="static/dashboard.js"></script>
+	</head>
+	
+	<body>
+		<h1 class="Title">{{.Name}}-Monitoring</h1>
+		<h3 class="Heading">Pool</h3>
+		
+		<div class="Pool">
+			{{range .Items}}
+			<div class="Item" data-id="{{.ID}}">
+				<div class="Item-Name">{{.Name}}</div>
+				<div class="Item-Prop">
+					<div class="Item-Label">Address:</div>
+					<div class="Item-Value">{{.Address}}</div>
+				</div>
+				<div class="Item-Prop">
+					<div class="Item-Label">Health:</div>
+					<div class="Item-Value"><IMG class="Item-Health" src="static/img/{{.Health}}.svg" /></div>
+				</div>
+				<div class="Item-Hidden">
+					<div class="Item-Prop">
+						<div class="Item-Label">Status:</div>
+						<div class="Item-Value">{{.Health}}</div>
+					</div>
+					<div class="Item-Prop">
+						<div class="Item-Label">Speed:</div>
+						<div class="Item-Value">{{.Speed}}</div>
+					</div>
+					<div class="Item-Prop">
+						<div class="Item-Label">Memory:</div>
+						<div class="Item-Value">{{.Memory}}</div>
+					</div>
+					<div class="Item-Prop">
+						<div class="Item-Label">Uptime:</div>
+						<div class="Item-Value">{{.Uptime}}</div>
+					</div>
+				</div>
+				<div class="Item-Section">Actions:</div>
+				<div class="Item-Controls">
+					<IMG class="Item-Control" title="Restart" src="static/img/Restart.svg" /><!--
+				 --><IMG class="Item-Control" title="Shutdown" src="static/img/Shutdown.svg" />
+				</div>
+			</div>
+			{{end}}
+		</div>
+	</body>
+</html>

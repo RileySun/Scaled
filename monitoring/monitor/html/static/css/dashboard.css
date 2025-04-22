@@ -1,0 +1,127 @@
+body, html {background:#262626; font-family:Helvetica; margin:0; position:relative; width:100vw}
+
+.Title {
+	display: block;
+	width: 27%;
+	margin: 2% auto;
+	padding: 0 0 1%;
+	color: #EFEFEF;
+	text-align: center;
+	font-size: 2.5vw;
+	border-bottom: 1px solid;
+}
+
+.Heading {
+	display: block;
+	width: 7%;
+	margin: 0 0 2% 2%;
+	padding: 0 0 0.3% 0.5%;
+	color: #EFEFEF;
+	font-size: 2vw;
+	font-weight: 100;
+	border-bottom: 1px solid;
+}
+
+.Pool {
+	display: block;
+	width: 96%;
+	margin: 0 auto;
+}
+
+.Item {
+	position: relative;
+	display: inline-block;
+	width: 15%;
+	margin: 1%;
+	padding: 1%;
+	background: #1e252e;
+	text-align: left;
+	font-size: 1.25vw;
+	color: #EFEFEF;
+	border-radius: 13px;
+}
+.Item-Name {
+	display: block;
+	width: 60%;
+	margin: 0 auto 8%;
+	padding 0 0 0.5%;
+	text-align: center;
+	font-size: 1.75vw;
+	border-bottom: 1px solid;
+}
+.Item-Prop {
+	margin: 4% 0;
+}
+.Item-Label {
+	display: inline-block;
+	width: 33%;
+	vertical-align: middle;
+}
+.Item-Value {
+	display: inline-block;
+	width: 64%;
+	text-align: right;
+	vertical-align: middle;
+}
+.Item-Health {
+	display: inline-block;
+	width: 30%;
+	vertical-align: bottom;
+	background: #0e1115;
+	border-radius: 100%;
+	cursor: pointer;
+}
+.Item-Hidden {
+	position: absolute;
+	display: none;
+	width: 71%;
+	top: 33%;
+  	right: 24%;
+  	padding: 2% 6%;
+	background: #0e1115;
+	border-radius: 13px;
+	z-index: 200;
+}
+
+.Item-Section {
+	display: block;
+	width: 100%;
+	margin: 0 0 8%;
+	padding: 0 0 3% 0.5%;
+	border-bottom: 1px solid;
+}
+.Item-Controls {
+	text-align: center;
+}
+.Item-Control {
+	display: inline-block;
+	width: 23%;
+	margin: 0 11%;
+	padding: 2%;
+	background: #797979;
+	border-radius: 100%;
+	transition: background 1s;
+	cursor: pointer;
+}
+.Item-Control:hover {
+	background: #E9E9E9;
+}
+
+/*Animations*/
+@keyframes show {
+	from {opacity: 0;}
+	to {opacity: 1;}
+}
+@keyframes hide {
+	from {opacity: 1;}
+	to {opacity: 0;}
+}
+
+@-webkit-keyframes show {
+	from {opacity: 0;}
+	to {opacity: 1;}
+}
+@-webkit-keyframes hide {
+	from {opacity: 1;}
+	to {opacity: 0;}
+}

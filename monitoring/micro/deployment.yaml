@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ creationTimestamp: null
+ labels:
+  app: micro-monitoring
+ name: micro-monitoring
+spec:
+ selector:
+  matchLabels:
+   app: micro-monitoring
+ strategy: {}
+ template:
+  metadata:
+   creationTimestamp: null
+   labels:
+    app: micro-monitoring
+  spec:
+   containers:
+   - name: monitor
+     image: micro-image:latest
+     imagePullPolicy: Never
+     resources: {}
+     ports:
+      - containerPort: 8080
+status: {}

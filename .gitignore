@@ -4,3 +4,4 @@ utils/.env
 /message-queue/RAW
 /websocket/RAW
 /monitoring/micro/RAW
+/utils/RAW

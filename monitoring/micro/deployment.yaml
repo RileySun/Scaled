@@ -6,6 +6,7 @@ metadata:
   app: micro-monitoring
  name: micro-monitoring
 spec:
+ replicas: 3
  selector:
   matchLabels:
    app: micro-monitoring
@@ -22,5 +23,5 @@ spec:
      imagePullPolicy: Never
      resources: {}
      ports:
-      - containerPort: 8080
+      - containerPort: 80
 status: {}

@@ -65,6 +65,7 @@ func (s *HandlerService) userGetStatus(w http.ResponseWriter, r *http.Request, p
 	}
 	
 	//Write header and Respond
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(status))
 }
 

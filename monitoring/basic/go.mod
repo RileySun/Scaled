@@ -1,4 +1,4 @@
-module github.com/RileySun/monitoring/monitor
+module github.com/RileySun/monitoring/basic
 
 go 1.22.4
 

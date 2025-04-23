@@ -13,7 +13,7 @@ import(
 )
 
 func main() {
-	dash := NewDashboard()
+	dash := NewDashboard("basic")
 	
 	//Create Router
 	router := httprouter.New()

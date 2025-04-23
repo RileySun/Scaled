@@ -2,8 +2,13 @@ package utils
 
 import(
 	"os"
+	"os/exec"
+	
+	"fmt"
 	"log"
 	"time"
+	"strings"
+	"strconv"
 	"net/http"
 	"math/rand"
 	
@@ -74,4 +79,48 @@ func StartHTTPServer(r http.Handler, port string) *http.Server {
 //Get Random Int (Min Inclusive->Max Exclusive)
 func GetRandomInt(min int, max int) int {
     return min + rand.Intn(max-min)
+}
+
+//Format Duration for Uptime
+func FormatUptime(dur time.Duration) string {
+	dur = dur.Round(time.Minute)
+	
+	d := dur / (time.Hour * 24)
+	dur -= d * (time.Hour * 24)
+	
+	h := dur / time.Hour
+	dur -= h * time.Hour
+    
+	m := dur / time.Minute
+	dur -= m * time.Minute
+	
+    return fmt.Sprintf("%01dd %01dh %01dm", d, h, m)
+}
+
+//Get Memory of running golang process
+func GetMemory() string {
+	//Get PID and use for ps
+	pid := os.Getpid()
+	pidStr := strconv.Itoa(pid)
+	
+	cmd := exec.Command("bash", "-c",  "ps -p " + pidStr +" -o rss=")
+	
+	out, err := cmd.Output()
+	if err != nil {
+		log.Println(err)
+		return "Error"
+	}
+	
+	formatted := strings.TrimSpace(string(out[:]))
+	mem, _ := strconv.ParseFloat(formatted, 32)
+	memStr := fmt.Sprintf("%.1f", mem/1000)
+	
+	return memStr
+}
+
+//Basic Server Data
+type ServerData struct {
+	Name string `json:"Name"`
+	Memory string `json:"Memory"`
+	Uptime string `json:"Uptime"`
 }

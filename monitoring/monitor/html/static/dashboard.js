@@ -14,11 +14,9 @@ function animationEnd(e) {
 	e.target.style.display = "none";
 }
 
-
-
-async function restart(e) {
+async function exportServer(e) {
 	const id = e.target.parentElement.parentElement.getAttribute("data-id")
-	const url = window.location + "restart/"+id;
+	const url = window.location + "export/"+id;
 	
 	try {
 		const response = await fetch(url);
@@ -26,15 +24,16 @@ async function restart(e) {
 			throw new Error(`Response status: ${response.status}`);
 		}
 		
-		const raw = await response.text();
-		switch(raw) {
-			case "OK":
-				window.location.reload();
-			case "Error":
-				//TODO Notify
-			default:
-				
-		}
+		//response.set({"Content-Disposition":`attachment; filename=\"ServerExport.json\"`})
+		
+		const blob = await response.blob();
+		const fileURL = window.URL.createObjectURL(blob)
+		const link = document.createElement("a")
+		link.href = fileURL
+		link.download = "ServerExport.json"
+		document.body.appendChild(link)
+		link.click()
+		document.body.removeChild(link)
 	}
 	catch (error) {
 		console.error(error.message);
@@ -79,7 +78,7 @@ window.addEventListener("load", () => {
 		
 		health.addEventListener("mouseover", () => {show(hidden)}, false)
 		health.addEventListener("mouseout", () => {hide(hidden)}, false)
-		rest.addEventListener("click", restart, false)
+		rest.addEventListener("click", exportServer, false)
 		shut.addEventListener("click", shutdown, false)
 	}); 
 	

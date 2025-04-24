@@ -3,14 +3,20 @@ package utils
 import(
 	"os"
 	"os/exec"
+	"os/signal"
 	
 	"fmt"
 	"log"
+	"net"
 	"time"
+	"context"
 	"strings"
 	"strconv"
+	"syscall"
 	"net/http"
 	"math/rand"
+	
+	"golang.org/x/sync/errgroup"
 	
 	"github.com/joho/godotenv"
 )
@@ -56,7 +62,39 @@ func LoadEnv() {
 }
 
 //HTTP Server
-func StartHTTPServer(r http.Handler, port string) *http.Server {
+func StartHTTPServer(ctx context.Context, port string, r http.Handler) {
+	//Get Signal Context
+	mainCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	
+	//Server Config
+	srv := &http.Server{
+		Handler: r,
+		Addr: ":" + port,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout: 15 * time.Second,
+		BaseContext: func(_ net.Listener) context.Context {
+			return mainCtx
+		},
+	}
+
+	//Create Errgroup, Launch Server, && Setup Shutdown
+	g, gCtx := errgroup.WithContext(mainCtx)
+	g.Go(func() error {
+		return srv.ListenAndServe()
+	}) //Launch Server
+	g.Go(func() error {
+		<-gCtx.Done()
+		return srv.Shutdown(context.Background())
+	}) //Graceful Shutdown
+
+	//Wait for Errgroup
+	if err := g.Wait(); err != nil {
+		//fmt.Printf("Shutdown: %s \n", err)
+	}
+}
+
+func StartHTTPServerOLD(r http.Handler, port string) *http.Server {
 	srv := &http.Server{
 		Handler: r,
 		Addr: ":" + port,

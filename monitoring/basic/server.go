@@ -1,10 +1,8 @@
 package main
 
 import(	
-	"os"
-	"os/signal"
+	"log"
 	"time"
-	"syscall"
 	"context"
 	"net/http"
 	"encoding/json"
@@ -16,7 +14,7 @@ import(
 
 //Structs
 type Server struct {
-	name, port string
+	name, port, status string
 	startTime time.Time
 	Shutdown func()
 	
@@ -28,6 +26,7 @@ func NewServer(name, newPort string) *Server {
 	server := &Server {
 		name:name,
 		port:newPort,
+		status:"offline",
 		debug:0,
 	}
 	
@@ -43,19 +42,20 @@ func (s *Server) Start() {
 	router := httprouter.New()
 	router.GET("/main/:message", s.Handle)
 	router.GET("/health", s.Health)
-		
-	//Listen with server
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	srv := utils.StartHTTPServer(router, s.port)
-	<-done
+	router.GET("/shutdown", s.Close)
 	
-	//Context for shutting down
+	//Get Context and Set Shutdown
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		panic(err)
+	s.Shutdown = func() {
+		log.Println("Shutting down server...")
+		cancel()
+		s.status = "offline"
 	}
+	
+	//Start Server
+	s.status = "online"
+	log.Println("Server Started")
+	utils.StartHTTPServer(ctx, s.port, router)
 }
 
 //Routes
@@ -83,7 +83,7 @@ func (s *Server) Health(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	}
 	
 	//Marshall
-	json, err := json.Marshal(data)
+	jsonStr, err := json.Marshal(data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error - Can not check health status"))
@@ -93,5 +93,9 @@ func (s *Server) Health(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	//Send
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(json)
+	w.Write(jsonStr)
+}
+
+func (s *Server) Close(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	s.Shutdown()
 }

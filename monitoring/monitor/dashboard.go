@@ -2,6 +2,7 @@ package main
 
 import(
 	"log"
+	"strings"
 	"strconv"
 	"net/http"
 	"html/template"
@@ -61,46 +62,64 @@ func (d *Dashboard) Handle(w http.ResponseWriter, r *http.Request, ps httprouter
     	Name string
     	Servers []*Server
 	}{
-		"Micro", d.Servers,
+		strings.Title(d.UpdateType), d.Servers,
 	}
 	
 	tmpl.Execute(w, templateData)
 }
 
-func (d *Dashboard) Restart(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (d *Dashboard) Export(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Validate Server ID
+	var server *Server
 	valid := false
 	id := ps.ByName("id")
 	for _, s := range d.Servers {
 		if s.ID == id {
+			server = s
 			valid = true
 		}
 	}
-	if !valid {
+	if !valid || server == nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error"))
 		return
 	}
 	
+	server.Update(d.UpdateType)
+	
+	if server.Health == "Error" {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	
+	json := server.Export()
+	if json == nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	
 	//DEBUG - Mock Server Restart
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	w.Header().Set("Content-Disposition", "attachment; filename=ServerExport.json")
+	w.Write(json)
 }
 
 func (d *Dashboard) Shutdown(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Validate Server ID
+	var server *Server
 	valid := false
 	id := ps.ByName("id")
 	for _, s := range d.Servers {
 		if s.ID == id {
+			server = s
 			valid = true
 		}
 	}
-	if !valid {
+	if !valid || server == nil  {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error"))
 		return
 	}
+	
+	server.Shutdown()
 	
 	//DEBUG - Mock Server Shutdown
 	w.WriteHeader(http.StatusOK)

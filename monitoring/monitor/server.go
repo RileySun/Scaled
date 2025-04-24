@@ -56,6 +56,26 @@ func LoadServers(updateType string) []*Server {
 }
 
 //Actions
+func (s *Server) Shutdown() error {
+	resp, err := http.Get("http://" + s.Address + "/shutdown")
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	
+	return nil
+}
+
+func (s *Server) Export() []byte {
+	jsonStr, err := json.Marshal(s)
+	if err != nil {
+		return nil
+	}
+	
+	return jsonStr
+}
+
+//Update Info
 func (s *Server) Update(updateType string) error {
 	switch updateType {
 		case "microservice":
@@ -79,10 +99,17 @@ func (s *Server) UpdateContainer() error {
 
 func (s *Server) UpdateBasic() error {	
 	startTime := time.Now()
+	
 	resp, err := http.Get("http://" + s.Address + "/health")
 	if err != nil {
+		s.Name = "Error"
+		s.Speed = "Error"
+		s.Uptime = "Error"
+		s.Memory = "Error"
+		s.Health = "Error"
 		return err
 	}
+	
 	endTime := int(time.Since(startTime).Milliseconds())
 	timeStr := strconv.Itoa(endTime) + "ms"
 	

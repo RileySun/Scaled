@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+ name: monitor-service2
+spec:
+ selector:
+  app: micro-monitoring2
+ ports:
+  - protocol: TCP
+    port: 7070
+    targetPort: 8080
+    
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ creationTimestamp: null
+ labels:
+  app: micro-monitoring2
+ name: micro-monitoring2
+spec:
+ replicas: 1
+ selector:
+  matchLabels:
+   app: micro-monitoring2
+ strategy: {}
+ template:
+  metadata:
+   creationTimestamp: null
+   labels:
+    app: micro-monitoring2
+  spec:
+   containers:
+   - name: monitor
+     image: RileySun/micro-image:latest
+     imagePullPolicy: Never
+     resources: {}
+     ports:
+      - containerPort: 80
+status: {}

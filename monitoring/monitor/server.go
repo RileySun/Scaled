@@ -79,7 +79,7 @@ func (s *Server) Export() []byte {
 func (s *Server) Update(updateType string) error {
 	switch updateType {
 		case "microservice":
-			return s.UpdateMicro()
+			return s.UpdateBasic()
 		case "container":
 			return s.UpdateContainer()
 		case "basic":

@@ -10,7 +10,7 @@ import(
 )
 
 func main() {
-	dash := NewDashboard("basic")
+	dash := NewDashboard("microservice")
 	
 	//Create Router
 	router := httprouter.New()

@@ -78,6 +78,8 @@ window.addEventListener("load", () => {
 		
 		health.addEventListener("mouseover", () => {show(hidden)}, false)
 		health.addEventListener("mouseout", () => {hide(hidden)}, false)
+		health.addEventListener("touchstart", () => {show(hidden)}, false)
+		health.addEventListener("touchend", () => {hide(hidden)}, false)
 		rest.addEventListener("click", exportServer, false)
 		shut.addEventListener("click", shutdown, false)
 	}); 

@@ -103,7 +103,7 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 	transition: background 1s;
 	cursor: pointer;
 }
-.Item-Control:hover {
+.Item-Control:hover, .Item-Control:active {
 	background: #E9E9E9;
 }
 
@@ -125,3 +125,17 @@ body, html {background:#262626; font-family:Helvetica; margin:0; position:relati
 	from {opacity: 1;}
 	to {opacity: 0;}
 }
+
+@media only screen and (min-width: 768px) and (max-width: 1000px) {
+	
+}
+@media only screen and (max-width: 767px) {
+	.Title {width: 60% !important; margin: 6% auto !important; font-size: 10vw !important; border-bottom: 2px solid !important;}
+	.Heading {width: 22% !important; margin: 0 0 5% 5% !important; font-size: 8vw !important; border-bottom: 2px solid !important;}
+	.Item {display: block !important; width: 80% !important; margin: 10% auto !important; font-size: 6.25vw !important;}
+	.Item-Name {font-size: 9vw !important; border-bottom: 2px solid !important;}
+	.Item-Value {width: 63% !important;}
+}
+/*Mobile*/
+
+

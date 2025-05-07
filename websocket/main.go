@@ -11,6 +11,7 @@ import(
 	"github.com/RileySun/Scaled/utils"
 )
 
+//Example Use
 func main() {
 	//Create App
 	app := NewApp()

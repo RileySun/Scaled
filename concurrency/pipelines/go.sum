@@ -1,0 +1,6 @@
+github.com/RileySun/Babylon v0.0.0-20250508120954-c5f937a8a5b4 h1:8G+olMtHuK/4aOhYY0EDsana0sAeFyZn1BjFvDxlq0w=
+github.com/RileySun/Babylon v0.0.0-20250508120954-c5f937a8a5b4/go.mod h1:ORMGaGM398GFSYj+asR3px2/Z3MgGyPk6lt20xaQEhU=
+github.com/anthonynsimon/bild v0.14.0 h1:IFRkmKdNdqmexXHfEU7rPlAmdUZ8BDZEGtGHDnGWync=
+github.com/anthonynsimon/bild v0.14.0/go.mod h1:hcvEAyBjTW69qkKJTfpcDQ83sSZHxwOunsseDfeQhUs=
+github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
+github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=

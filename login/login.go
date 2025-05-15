@@ -1,15 +1,12 @@
-package main
+package login
 
 import (
-	"os"
 	"log"
 	"time"
 	"errors"
 	"context"
-	"syscall"
 	"net/http"
 	"net/mail"
-	"os/signal"
 	"database/sql"
 	
 	"golang.org/x/crypto/bcrypt"
@@ -17,18 +14,46 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/golang-jwt/jwt"
 	
-	//Internal Utils
 	"github.com/RileySun/Scaled/utils"
 )
+type Login struct {
+	DB *sql.DB
+	ctx context.Context
+	secretKey []byte
+}
 
-var DB *sql.DB
-var server *http.Server
-var secretKey = []byte("super-secret")
+func NewLogin(ctx context.Context) (*Login, error) {
+	login := &Login{
+		ctx:ctx,
+		secretKey:[]byte("super-secret"),
+	}
+	
+	//Database connection
+	creds := utils.LoadCredentials()
+	var err error
+	login.DB, err = utils.NewDB(creds.Host, creds.Port, creds.User, creds.Pass, creds.Database)
+	if err != nil {
+		return login, err
+	}
+	
+	return login, nil
+}
+
+//Server Function
+func (l *Login) Serve(address string) {
+	//Routes
+	router := httprouter.New()
+	router.POST("/login", l.loginHandler)
+	router.GET("/check", l.checkHandler)
+	
+	//Start
+	go func() {utils.StartHTTPServer(l.ctx, "8080", router)}()
+}
 
 //Data Functions
-func checkLogin(email, password string) error {
+func (l *Login) checkLogin(email, password string) error {
 	var hashedPassword string
-	row := DB.QueryRow("SELECT `password` FROM Users WHERE `email` = ?;", email)
+	row := l.DB.QueryRow("SELECT `password` FROM Users WHERE `email` = ?;", email)
 	
 	scanErr := row.Scan(&hashedPassword)
 	if scanErr != nil {
@@ -44,14 +69,14 @@ func checkLogin(email, password string) error {
 	}
 }
 
-func createToken(email string) (string, error) {
+func (l *Login) createToken(email string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"email":email,
 			"expires":time.Now().Add(time.Hour * 6).Unix(),
 		})
 	
-	tokenStr, signErr := token.SignedString(secretKey)
+	tokenStr, signErr := token.SignedString(l.secretKey)
 	if signErr != nil {
 		return "", signErr
 	}
@@ -59,10 +84,10 @@ func createToken(email string) (string, error) {
 	return tokenStr, nil
 }
 
-func checkToken(tokenStr string) error {
+func (l *Login) checkToken(tokenStr string) error {
 	//Create token refrence from token string
 	token, verifyErr := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		return secretKey, nil
+		return l.secretKey, nil
 	})
 	if verifyErr != nil {
 		return verifyErr
@@ -77,8 +102,7 @@ func checkToken(tokenStr string) error {
 }
 
 //Route Handlers
-func loginHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	
+func (l *Login) loginHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Parse Data
 	r.ParseForm()
 	email := r.PostFormValue("email")
@@ -87,80 +111,55 @@ func loginHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) 
 	//Validate (Saves having to check a database if it isnt even a valid email)
 	_, emailErr := mail.ParseAddress(email)
 	if emailErr != nil {
+		log.Println(emailErr)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Invalid Login Credentials"))
+		return
 	}
 	
 	//Check Login
-	loginErr := checkLogin(email, pass)
+	loginErr := l.checkLogin(email, pass)
 	if loginErr != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(loginErr.Error()))
+		return
 	}
 	
 	//Create Token
-	tokenStr, tokenErr := createToken(email)
+	tokenStr, tokenErr := l.createToken(email)
 	if tokenErr != nil {
 		log.Println(tokenErr)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Please Contact [ADMIN] About Token Issue"))
+		return
 	}
 	
 	//Return
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(tokenStr))
 }
 
-func checkHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (l *Login) checkHandler(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	//Get Bearer String
 	bearerStr := r.Header.Get("Authorization")
 	if bearerStr == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("Invalid Access Token"))
+		return
 	}
 	
 	//Get Token
 	tokenStr := bearerStr[len("Bearer "):]
 	
 	//Check Token
-	checkErr := checkToken(tokenStr)
+	checkErr := l.checkToken(tokenStr)
 	if checkErr != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte("Invalid Access Token"))
+		return
 	}
 	
 	//All is well
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
-}
-
-//Run Server
-func main() {
-	//Create DB
-	creds := utils.LoadCredentials()
-	DB = utils.NewDB(creds.Host, creds.Port, creds.User, creds.Pass, creds.Database)
-
-	//create http router
-	router := httprouter.New()
-	
-	//set routes
-	router.POST("/login", loginHandler) //Logins
-	router.GET("/check", checkHandler) //Is logged in checker
-	
-	//Create server (can close gracefully with Shutdown())
-	done := make(chan os.Signal, 1)
-	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-	server = utils.StartHTTPServer(router, "8080")
-	<-done
-	
-	//Context for shutting down
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer func() {
-		//Graceful shutdown functions here
-		cancel()
-	}()
-	if err := server.Shutdown(ctx); err != nil {
-		panic(err)
-	}
 }

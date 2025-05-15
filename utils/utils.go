@@ -94,26 +94,6 @@ func StartHTTPServer(ctx context.Context, port string, r http.Handler) {
 	}
 }
 
-func StartHTTPServerOLD(r http.Handler, port string) *http.Server {
-	srv := &http.Server{
-		Handler: r,
-		Addr: ":" + port,
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout: 15 * time.Second,
-	}
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			//prob intentional close
-		} else {
-			log.Printf("Httpserver: ListenAndServe() closing...")
-		}
-	}()
-
-	//returned for Shutdown()
-	return srv
-}
-
 //Get Random Int (Min Inclusive->Max Exclusive)
 func GetRandomInt(min int, max int) int {
     return min + rand.Intn(max-min)

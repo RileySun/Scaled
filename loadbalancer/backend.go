@@ -2,9 +2,13 @@ package loadbalancer
 
 import(
 	"sync"
+	"context"
 	"net/url"
 	"net/http"
 	"net/http/httputil"
+	
+	"github.com/julienschmidt/httprouter"
+	"github.com/RileySun/Scaled/utils"
 ) 
 
 //Interface
@@ -39,6 +43,12 @@ func (b *backend) IsAlive() bool {
 	return b.alive
 }
 
+func (b *backend) SetUrl(url *url.URL) {
+	b.mux.Lock()
+	b.url = url
+	b.mux.Unlock()
+}
+
 func (b *backend) GetUrl() *url.URL {
 	return b.url
 }
@@ -51,6 +61,10 @@ func (b *backend) GetWeight() int {
 	return b.weight
 }
 
-func (b *backend) Serve(http.ResponseWriter, *http.Request) {
-	//Use ur imagination for the actual server code, or see any other project about go servers
-}
+func (b *backend) Serve(ctx context.Context) {
+	router := httprouter.New()
+	router.GET("/", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		w.Write("Hello!")
+	})
+	utils.StartHTTPServer(ctx, b.url, router)
+} //Mock Service

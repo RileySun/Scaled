@@ -29,7 +29,7 @@ func NewLogin(ctx context.Context) (*Login, error) {
 	}
 	
 	//Database connection
-	creds := utils.LoadCredentials()
+	creds := utils.LoadCredentials("../utils/.env")
 	var err error
 	login.DB, err = utils.NewDB(creds.Host, creds.Port, creds.User, creds.Pass, creds.Database)
 	if err != nil {

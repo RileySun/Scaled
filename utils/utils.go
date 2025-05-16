@@ -35,8 +35,8 @@ type Credentials struct {
 	Database string `json:"database"`	//Database Table
 }
 
-func LoadCredentials() *Credentials {
-	envErr := godotenv.Load("../utils/.env") //Always relative to all folders in project
+func LoadCredentials(path string) *Credentials {
+	envErr := godotenv.Load(path) //Always relative to all folders in project
 	if envErr != nil {
 		log.Println("Utils: Error loading .env file - ", envErr)
 		log.Println("This may be caused by running in docker")

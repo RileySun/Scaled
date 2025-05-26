@@ -5,3 +5,4 @@ utils/.env
 /websocket/RAW
 /monitoring/micro/RAW
 /utils/RAW
+/hls/RAW

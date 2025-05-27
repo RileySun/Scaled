@@ -5,16 +5,20 @@ import(
 	"os/exec"
 	"os/signal"
 	
+	"io"
 	"fmt"
 	"log"
 	"net"
 	"time"
+	"bytes"
 	"context"
 	"strings"
 	"strconv"
 	"syscall"
 	"net/http"
 	"math/rand"
+	"path/filepath"
+	"mime/multipart"
 	
 	"golang.org/x/sync/errgroup"
 	
@@ -141,4 +145,46 @@ type ServerData struct {
 	Name string `json:"Name"`
 	Memory string `json:"Memory"`
 	Uptime string `json:"Uptime"`
+}
+
+//Upload File to URL
+func UploadFile(ctx context.Context, url string, fpath string, formfield string) (error) {	
+	filename := filepath.Base(fpath)
+	b, w := multipartFormData(fpath, filename, formfield)
+	
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, &b)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	
+	client := &http.Client{}
+	_, reqErr := client.Do(req)
+	return reqErr
+}
+
+func multipartFormData(fpath string, filename string, formfield string) (bytes.Buffer, *multipart.Writer) {
+	var b bytes.Buffer
+	var err error
+	var fw io.Writer
+	
+	w := multipart.NewWriter(&b)
+	
+	file, err := os.Open(fpath)
+	if err != nil {
+		log.Fatal("Error opening file", fpath, err)
+	}
+	
+	fw, err = w.CreateFormFile(formfield, filename)
+	if err != nil {
+		log.Fatal("Error creating writer:", err)
+	}
+	
+	_, err = io.Copy(fw, file)
+	if err != nil {
+		log.Fatal("Error copying file:", err)
+	}
+	w.Close()
+	
+	return b, w
 }

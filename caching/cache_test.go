@@ -14,13 +14,13 @@ var cacher = NewCacher()
 
 func TestSet(t *testing.T) {
 	//Random Key/Value Pairs (words)
-	babbler := babylon.NewBabylon(1)
+	babbler := babylon.NewBabylon()
 	
 	//Set
 	var randomKey string
 	for i:=0; i<1000; i++ {
 		key := babbler.Babble()
-		err := cacher.Set(key, babbler.Babble(), time.Minute * 10)
+		err := cacher.Set(key, babbler.Babble(1), time.Minute * 10)
 		if err != nil {
 			t.Error(err)
 		}

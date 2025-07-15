@@ -10,9 +10,9 @@ import(
 )
 
 func sortExample() {
-	bab := babylon.NewBabylon(50)
-	strRaw1 := bab.Babble()
-	strRaw2 := bab.Babble()
+	bab := babylon.NewBabylon()
+	strRaw1 := bab.Babble(50)
+	strRaw2 := bab.Babble(50)
 	
 	str1 := strings.Split(strRaw1, " ")
 	str2 := strings.Split(strRaw2, " ")

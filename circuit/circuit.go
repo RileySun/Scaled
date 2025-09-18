@@ -25,13 +25,14 @@ func NewCircuit(maxFailLimit int64) *Circuit {
 	circuit := &Circuit{
 		FailLimit:maxFailLimit,
 		state:"Working",
+		failures:atomiccounter.MakeInt64(),
 	}
 	
 	return circuit
 }
 
-func (c *Circuit) Execute(ctx context.Context, action interface{}, err error) (interface{}, error) {
-	if c.failures.Read() > c.FailLimit {
+func (c *Circuit) Execute(ctx context.Context, action func() (any, error)) (interface{}, error) {
+	if c.failures.Read() >= c.FailLimit {
 		ctx.Done()
 		ctx.Err()
 		
@@ -43,15 +44,15 @@ func (c *Circuit) Execute(ctx context.Context, action interface{}, err error) (i
 			c.OnBreak()
 		}
 		
-		return nil, Errors.New("Circuit breaker flipped shutting down")
+		return nil, errors.New("Circuit breaker flipped shutting down")
 	}
 	
-	result, err := req()
+	result, err := action()
 	
 	if err != nil {
 		c.mutex.Lock()
 		c.failures.Inc()
-		c.LastAttempt = time.Now()
+		c.lastAttempt = time.Now()
 		c.mutex.Unlock()
 	}
 	
@@ -67,7 +68,7 @@ func (c *Circuit) State() string {
 
 func (c *Circuit) Failures() int64 {
 	c.mutex.Lock()
-	failures := c.failures
+	failures := c.failures.Read()
 	c.mutex.Unlock()
 	return failures
 }
